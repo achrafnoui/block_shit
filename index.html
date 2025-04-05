@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الله يحب المتفوقين</title>
     <style>
+        /* Reset default margins and padding */
         body, html {
             margin: 0;
             padding: 0;
@@ -26,17 +27,6 @@
             display: none;
             max-width: 100%;
             max-height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .mySlides.active {
-            display: flex;
-            opacity: 1;
         }
         img {
             max-width: 100%;
@@ -44,6 +34,7 @@
             object-fit: contain;
             display: block;
         }
+        /* Fade animation */
         .fade {
             animation: fade 1.5s;
         }
@@ -57,65 +48,64 @@
     <div class="slideshow-container" id="slideshow"></div>
 
     <script>
+        // Replace these with your GitHub username, repo name, and branch
         const username = "achrafnoui";
         const repo = "block_shit";
         const branch = "main";
         const folder = "images";
 
+        // URLs for GitHub API and raw content
         const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}?ref=${branch}`;
         const baseUrl = `https://raw.githubusercontent.com/${username}/${repo}/${branch}/${folder}/`;
 
+        // Fetch images from GitHub API
         async function fetchImages() {
             try {
-                console.log("Fetching from:", apiUrl); // Log the API URL
                 const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`API request failed with status: ${response.status}`);
-                }
+                if (!response.ok) throw new Error("API request failed");
                 const data = await response.json();
-                console.log("API response:", data); // Log the API response
                 const imageFiles = data
-                    .filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file.name))
+                    .filter(file => /\.(png|jpg|jpeg|gif)$/i.test(file.name)) // Filter for image files
                     .map(file => file.name);
-                if (imageFiles.length === 0) {
-                    throw new Error("No images found in the 'images' folder");
-                }
-                console.log("Found images:", imageFiles); // Log the filtered images
+                if (imageFiles.length === 0) throw new Error("No images found");
                 createSlideshow(imageFiles);
             } catch (error) {
-                console.error("Error fetching images:", error.message);
-                // Fallback to default images
+                console.error("Error fetching images:", error);
+                // Fallback to a default list if API fails
                 createSlideshow(["image1.png", "image2.png", "image3.jpeg"]);
             }
         }
 
+        // Create slideshow with fetched images
         function createSlideshow(imageFiles) {
             const container = document.getElementById("slideshow");
-            imageFiles.forEach((file) => {
+            imageFiles.forEach((file, index) => {
                 const slide = document.createElement("div");
-                slide.className = "mySlides";
+                slide.className = "mySlides fade";
+                if (index !== 0) slide.style.display = "none"; // Show only first slide initially
                 const img = document.createElement("img");
                 img.src = baseUrl + file;
-                img.alt = `Image`;
-                img.onerror = () => console.error(`Failed to load image: ${img.src}`); // Log image load errors
+                img.alt = `Image ${index + 1}`;
                 slide.appendChild(img);
                 container.appendChild(slide);
             });
-            showSlides();
+            showSlides(); // Start the slideshow
         }
 
-        let slideIndex = -1;
+        // Slideshow logic
+        let slideIndex = 0;
         function showSlides() {
             let slides = document.getElementsByClassName("mySlides");
             for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.remove("active");
+                slides[i].style.display = "none";  
             }
             slideIndex++;
-            if (slideIndex >= slides.length) {slideIndex = 0}
-            slides[slideIndex].classList.add("active");
-            setTimeout(showSlides, 3000);
+            if (slideIndex > slides.length) {slideIndex = 1}    
+            slides[slideIndex-1].style.display = "flex";
+            setTimeout(showSlides, 2000); // Change image every 2 seconds
         }
 
+        // Start the process
         fetchImages();
     </script>
 </body>
